@@ -1,13 +1,10 @@
 package model;
 
-import java.io.IOException;
-import java.io.InputStream;
-
-import org.apache.commons.io.IOUtils;
-
 public class Attachment {
 	String name;
-	InputStream inputStream;
+	String mimeType;
+	byte[] byteArray;
+	byte[] signature;		
 	
 	public String getName() {
 		return name;
@@ -15,14 +12,27 @@ public class Attachment {
 	public void setName(String name) {
 		this.name = name;
 	}
-	public InputStream getInputStream() {
-		return inputStream;
-	}
-	public void setInputStream(InputStream inputStream) {
-		this.inputStream = inputStream;
+	
+	public String getNameWithoutExtension() {
+		return this.name.substring(0, this.name.lastIndexOf("."));
 	}
 	
-	public byte[] getBytes() throws IOException {
-		return IOUtils.toByteArray(this.inputStream);
+	public byte[] getByteArray() {
+		return byteArray;
+	}
+	public void setByteArray(byte[] byteArray) {
+		this.byteArray = byteArray;
+	}
+	public byte[] getSignature() {
+		return signature;
+	}
+	public void setSignature(byte[] signature) {
+		this.signature = signature;
+	}
+	public String getMimeType() {
+		return mimeType;
+	}
+	public void setMimeType(String mimeType) {
+		this.mimeType = mimeType;
 	}
 }

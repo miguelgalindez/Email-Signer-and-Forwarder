@@ -5,22 +5,27 @@ import java.util.Properties;
 import logic.EmailProviderBO;
 import model.Email;
 
-public class EmailProviderController {
-	
-	String host;
-	String port; 
-	String user; 
-	String password;
+public class EmailProviderController {	
 	Properties configurationProperties;	
 	
-	public EmailProviderController() {
-		this.configurationProperties=EmailProviderBO.getInstance().loadPropertiesFile("./src/util/configuration.properties");
-		Properties accountProperties=EmailProviderBO.getInstance().loadPropertiesFile(configurationProperties.getProperty("email.account.propertiesFile"));
-		this.configurationProperties.put("user", accountProperties.getProperty("user"));
-		this.configurationProperties.put("password", accountProperties.getProperty("password"));		
+	public EmailProviderController(Properties properties) {
+		this.configurationProperties=properties;
 	}
 	
 	public ArrayList<Email> getEmails(){
-		return EmailProviderBO.getInstance().getEmails(configurationProperties);
+		if(configurationProperties!=null)
+			return EmailProviderBO.getInstance().getEmails(configurationProperties);
+		return null;
+	}
+
+	public boolean sendEmails(ArrayList<Email> emails) {
+		if(this.configurationProperties!=null) {
+			for(Email email : emails) {
+				if(EmailProviderBO.getInstance().sendEmail(email, configurationProperties)==false)
+					return false;
+			}
+			return true;
+		}
+		return false;
 	}
 }
