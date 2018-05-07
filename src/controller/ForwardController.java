@@ -64,6 +64,7 @@ public class ForwardController {
 		Properties forwarderMailAccountProperties=loadPropertiesFile(configurationProperties.getProperty("forwarder.mailAccount.propertiesFile"));
 		configurationProperties.put("forwarder.mailAccount.user", forwarderMailAccountProperties.getProperty("user"));
 		configurationProperties.put("forwarder.mailAccount.password", forwarderMailAccountProperties.getProperty("password"));
+		configurationProperties.put("forwarder.mailAccount.nameToDisplay", forwarderMailAccountProperties.getProperty("nameToDisplay", forwarderMailAccountProperties.getProperty("user")));
 		return configurationProperties;
 	}
 	 

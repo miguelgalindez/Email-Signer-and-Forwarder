@@ -148,7 +148,7 @@ public class EmailProviderBO {
 		try {
 			Session session = Session.getInstance(configurationProperties, null);
 			Message msg = new MimeMessage(session);			
-			msg.setFrom(new InternetAddress(configurationProperties.getProperty("forwarder.mailAccount.user")));
+			msg.setFrom(new InternetAddress(configurationProperties.getProperty("forwarder.mailAccount.user"), configurationProperties.getProperty("forwarder.mailAccount.nameToDisplay")));
 			String[] receiversAddresses=configurationProperties.getProperty("forwarder.forwardTo").replaceAll(" ", "").split(",");
 			InternetAddress[] receivers=new InternetAddress[receiversAddresses.length];
 			for(int i=0; i<receiversAddresses.length; i++)
