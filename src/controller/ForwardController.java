@@ -44,7 +44,12 @@ public class ForwardController {
 			attachment.setByteArray(IOUtils.toByteArray(is));
 			is.close();
 			is=new FileInputStream(file+".signature");
-			return signatureController.verifySignature(attachment, IOUtils.toByteArray(is));
+			boolean verified=signatureController.verifySignature(attachment, IOUtils.toByteArray(is));
+			if(verified)
+				System.out.println(file+"\tSignature successfully verified.");
+			else
+				System.err.println(file+"\tSignature couldn't be verified (The file has been altered).");
+			return verified;
 		}catch(Exception ex) { ex.printStackTrace();}
 		 finally { try {is.close();} catch (IOException e) {e.printStackTrace();}}
 		return false;
@@ -80,10 +85,10 @@ public class ForwardController {
 	public static void main(String[] args) {				
 		configurationProperties=loadProperties();
 		forwardEmails(configurationProperties);
+		//verifySign("/home/miguel/Descargas/resultado_20180417.zip");
+		
 		
 		/*
-		 * System.out.println("Connectors: "+verifySign("/home/miguel/Descargas/connectors.pdf"));
-		 * System.out.println("irregular verbs: "+verifySign("/home/miguel/Descargas/irregular verbs.pdf"));
 		Timer timer = new Timer();
         timer.schedule(new TimerTask() {				
             @Override
