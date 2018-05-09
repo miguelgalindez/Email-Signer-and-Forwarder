@@ -1,9 +1,10 @@
-package controller;
+package co.edu.unicauca.emailForwarder.control;
 
 import java.util.ArrayList;
 import java.util.Properties;
-import logic.EmailProviderBO;
-import model.Email;
+
+import co.edu.unicauca.emailForwarder.logic.EmailProviderBO;
+import co.edu.unicauca.emailForwarder.model.Email;
 
 public class EmailProviderController {	
 	Properties configurationProperties;	

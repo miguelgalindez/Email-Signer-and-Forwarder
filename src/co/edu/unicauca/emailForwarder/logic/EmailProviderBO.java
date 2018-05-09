@@ -1,4 +1,4 @@
-package logic;
+package co.edu.unicauca.emailForwarder.logic;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -32,8 +32,8 @@ import org.apache.tika.metadata.Metadata;
 
 import com.sun.mail.smtp.SMTPTransport;
 
-import model.Attachment;
-import model.Email;
+import co.edu.unicauca.emailForwarder.model.Attachment;
+import co.edu.unicauca.emailForwarder.model.Email;
 
 public class EmailProviderBO {
 	private static EmailProviderBO instance = null;

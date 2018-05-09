@@ -1,4 +1,4 @@
-package logic;
+package co.edu.unicauca.emailForwarder.logic;
 
 import java.io.File;
 import java.nio.file.Files;
@@ -10,7 +10,8 @@ import java.security.Signature;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Properties;
-import model.Attachment;
+
+import co.edu.unicauca.emailForwarder.model.Attachment;
 
 public class SignatureBO {
 	private static SignatureBO instance = null;	

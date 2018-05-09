@@ -1,11 +1,11 @@
-package controller;
+package co.edu.unicauca.emailForwarder.control;
 
 import java.util.ArrayList;
 import java.util.Properties;
 
-import logic.SignatureBO;
-import model.Attachment;
-import model.Email;
+import co.edu.unicauca.emailForwarder.logic.SignatureBO;
+import co.edu.unicauca.emailForwarder.model.Attachment;
+import co.edu.unicauca.emailForwarder.model.Email;
 
 public class SignatureController {
 	Properties properties;
