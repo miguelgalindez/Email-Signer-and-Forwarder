@@ -14,29 +14,21 @@ public class SignatureController {
 		this.properties=properties;
 	}
 	
-	public boolean signMailsAttachments(ArrayList<Email> emails) {
+	public void signMailsAttachments(ArrayList<Email> emails) throws Exception{
 		if(this.properties!=null) {
-			for(Email email : emails) {
-				if(this.signMailAttachments(email)==false)
-					return false;
-			}
-			return true;				
+			for(Email email : emails)
+				this.signMailAttachments(email);			
 		}
-		return false;
+		else
+			throw new Exception("[Email-Forwarder] Mails attachments couldn't be signed because the properties file couldn't be loaded. Check the log...");
 	}
 	
-	public boolean signMailAttachments(Email email) {
-		if(this.properties!=null) {
-			for(Attachment attachment : email.getAttachments())
-				attachment.setSignature(SignatureBO.getInstance().sign(attachment, properties));
-			return true;
-		}
-		return false;
+	public void signMailAttachments(Email email) throws Exception{		
+		for(Attachment attachment : email.getAttachments())
+			attachment.setSignature(SignatureBO.getInstance().sign(attachment, properties));				
 	}
 	
-	public boolean verifySignature(Attachment attachment, byte[] signature) {
-		if(this.properties!=null)
-			return SignatureBO.getInstance().verifySignature(attachment, signature, properties); 
-		return false;
+	public boolean verifySignature(Attachment attachment, byte[] signature) throws Exception {		
+		return SignatureBO.getInstance().verifySignature(attachment, signature, properties); 		
 	}
 }

@@ -52,7 +52,7 @@ public class EmailProviderBO {
 		this.store=null;
 	}
 	
-	public ArrayList<Email> getEmails(Properties properties) {                                                                  		 
+	public ArrayList<Email> getEmails(Properties properties) throws Exception{                                                                  		 
 		try {      	
             Message[] arrayMessages = this.getNewMessages(properties); 
             ArrayList<Email> emails=new ArrayList<>();
@@ -75,12 +75,11 @@ public class EmailProviderBO {
                 emails.add(email);                
             }
             return emails;
-		} catch (Exception e) {e.printStackTrace();}
+		} catch (Exception e) {throw e;}
 		finally {
 			if(this.folderInbox!=null) try{ this.folderInbox.close(false);}catch(Exception ex) {ex.getStackTrace();};
 			if(this.store!=null) try{ this.store.close();}catch(Exception ex) {ex.getStackTrace();};
-		}
-        return null;
+		}        
     }	
 
 	private void processMultiPart(Message message, Email email) throws Exception {		
@@ -143,7 +142,7 @@ public class EmailProviderBO {
         }
     }
 
-	public boolean sendEmail(Email email, Properties configurationProperties) {
+	public void sendEmail(Email email, Properties configurationProperties) throws Exception{
 		SMTPTransport transport=null;
 		try {
 			Session session = Session.getInstance(configurationProperties, null);
@@ -187,13 +186,10 @@ public class EmailProviderBO {
 	        // sends the e-mail
 	        transport = (SMTPTransport) session.getTransport("smtps");
 	        transport.connect("smtp.gmail.com", configurationProperties.getProperty("forwarder.mailAccount.user"), configurationProperties.getProperty("forwarder.mailAccount.password"));
-	        transport.sendMessage(msg, msg.getAllRecipients());	        
-	        return true;
+	        transport.sendMessage(msg, msg.getAllRecipients());	        	        
 	        
-		}catch(Exception ex) {ex.printStackTrace();}
+		}catch(Exception ex) {throw ex;}
 		 finally {if(transport!=null) try {transport.close();} catch (MessagingException e) {e.printStackTrace();}}
-		
-		return false;
 	}
 	
 	private String detectMymeType(String fileName, byte[] byteArray) {

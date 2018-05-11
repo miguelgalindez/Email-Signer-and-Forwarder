@@ -24,16 +24,12 @@ public class SignatureBO {
 	}
 	
 	
-	public byte[] sign(Attachment attachment, Properties properties){
-		try {
-			return this.sign(attachment.getByteArray(), this.getPrivateKey(properties.getProperty("forwarder.privateKeyFile")));
-		}catch(Exception ex) {ex.printStackTrace(); return null;}		
+	public byte[] sign(Attachment attachment, Properties properties) throws Exception{		
+		return this.sign(attachment.getByteArray(), this.getPrivateKey(properties.getProperty("forwarder.privateKeyFile")));				
 	}
 	
-	public boolean verifySignature(Attachment attachment, byte[] signature, Properties properties){		
-		try {
-			return this.verifySignature(attachment, signature, this.getPublicKey(properties.getProperty("forwarder.publicKeyFile")));
-		}catch(Exception ex) {ex.printStackTrace(); return false;}
+	public boolean verifySignature(Attachment attachment, byte[] signature, Properties properties) throws Exception{				
+		return this.verifySignature(attachment, signature, this.getPublicKey(properties.getProperty("forwarder.publicKeyFile")));		
 	}
 	
 	private byte[] sign(byte[] data, PrivateKey privateKey) throws InvalidKeyException, Exception{

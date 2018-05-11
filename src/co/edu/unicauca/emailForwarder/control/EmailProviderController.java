@@ -13,20 +13,19 @@ public class EmailProviderController {
 		this.configurationProperties=properties;
 	}
 	
-	public ArrayList<Email> getEmails(){
+	public ArrayList<Email> getEmails() throws Exception{
 		if(configurationProperties!=null)
 			return EmailProviderBO.getInstance().getEmails(configurationProperties);
-		return null;
+		else
+			throw new Exception("[Email-Forwarder] Mails couldn't be gotten because the properties file couldn't be loaded. Check the log...");
 	}
 
-	public boolean sendEmails(ArrayList<Email> emails) {
+	public void sendEmails(ArrayList<Email> emails) throws Exception {
 		if(this.configurationProperties!=null) {
-			for(Email email : emails) {
-				if(EmailProviderBO.getInstance().sendEmail(email, configurationProperties)==false)
-					return false;
-			}
-			return true;
+			for(Email email : emails)
+				EmailProviderBO.getInstance().sendEmail(email, configurationProperties);			
 		}
-		return false;
+		else
+			throw new Exception("[Email-Forwarder] Mails couldn't be sent because the properties file couldn't be loaded. Check the log...");
 	}
 }
