@@ -23,7 +23,6 @@ import javax.mail.search.FromStringTerm;
 import javax.mail.search.OrTerm;
 import javax.mail.search.ReceivedDateTerm;
 import javax.mail.search.SearchTerm;
-import javax.mail.search.SubjectTerm;
 import javax.mail.util.ByteArrayDataSource;
 import org.apache.commons.io.IOUtils;
 import org.apache.tika.config.TikaConfig;
@@ -128,14 +127,29 @@ public class EmailProviderBO {
 	        cal.roll(Calendar.DATE, false); // Set date to 1 day back from now
 	        ReceivedDateTerm latest = new ReceivedDateTerm(DateTerm.GT, cal.getTime());
 	        FlagTerm unread = new FlagTerm(new Flags(Flags.Flag.SEEN), false);	 
-	        SearchTerm latestUnread = new AndTerm(unread, latest);		        	
-	        AndTerm subjectTerm = new AndTerm(new SubjectTerm("Notable"), unread);
+	        SearchTerm latestUnread = new AndTerm(unread, latest);		      
+	        SearchTerm subjectTerm=this.createSubjectTerm(properties.getProperty("forwarder.observedSubjects"));
 	        AndTerm criteria = new AndTerm(fromTerm, new OrTerm(latestUnread, subjectTerm));	        	        
 	        return criteria;
         }catch(Exception ex) {
         	ex.printStackTrace();
         	return null;
         }
+	}
+	
+	private SearchTerm createSubjectTerm(String subjectRegexp) {
+		return new SearchTerm() {		    
+			private static final long serialVersionUID = 1L;
+
+			public boolean match(Message message) {
+		        try {
+		        	return message.getSubject().matches(subjectRegexp);
+		        } catch (MessagingException ex) {
+		            ex.printStackTrace();
+		            return false;
+		        }		        
+		    }
+		};		
 	}
 
 	public void sendEmail(Email email, Properties configurationProperties) throws Exception{

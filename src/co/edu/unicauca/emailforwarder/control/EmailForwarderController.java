@@ -37,4 +37,8 @@ public class EmailForwarderController {
 		return this.verifySign(IOUtils.toByteArray(file), IOUtils.toByteArray(signature));
 		
 	}
+	
+	public boolean isSuccessfullySettingUp(){
+		return this.configurationProperties!=null;
+	}
 }
