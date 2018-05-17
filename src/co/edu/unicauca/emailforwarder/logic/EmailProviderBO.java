@@ -1,4 +1,4 @@
-package co.edu.unicauca.emailForwarder.logic;
+package co.edu.unicauca.emailforwarder.logic;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -19,7 +19,7 @@ import javax.mail.internet.MimeMultipart;
 import javax.mail.search.AndTerm;
 import javax.mail.search.DateTerm;
 import javax.mail.search.FlagTerm;
-import javax.mail.search.FromTerm;
+import javax.mail.search.FromStringTerm;
 import javax.mail.search.OrTerm;
 import javax.mail.search.ReceivedDateTerm;
 import javax.mail.search.SearchTerm;
@@ -32,8 +32,8 @@ import org.apache.tika.metadata.Metadata;
 
 import com.sun.mail.smtp.SMTPTransport;
 
-import co.edu.unicauca.emailForwarder.model.Attachment;
-import co.edu.unicauca.emailForwarder.model.Email;
+import co.edu.unicauca.emailforwarder.model.Attachment;
+import co.edu.unicauca.emailforwarder.model.Email;
 
 public class EmailProviderBO {
 	private static EmailProviderBO instance = null;
@@ -104,12 +104,8 @@ public class EmailProviderBO {
 		Session session = Session.getInstance(properties, null);
         this.store = session.getStore();
         this.store.connect(properties.getProperty("host"), properties.getProperty("forwarder.observedAccount.user"), properties.getProperty("forwarder.observedAccount.password"));
-
-        // opens the inbox folder
         this.folderInbox = this.store.getFolder("INBOX");
         this.folderInbox.open(Folder.READ_WRITE);
-
-        // fetches new messages from server
         SearchTerm searchCriteria=getSearchCriteria(properties);
         if(searchCriteria==null) 
         	throw new Exception("The search criteria couldn't be initialized.");
@@ -123,9 +119,9 @@ public class EmailProviderBO {
 	        SearchTerm fromTerm=null;
 	        for(String observedSender : observedSenders) {
 	        	if(fromTerm==null)
-	        		fromTerm=new FromTerm(new InternetAddress(observedSender));
+	        		fromTerm=new FromStringTerm(observedSender);
 	        	else
-	        		fromTerm=new OrTerm(fromTerm, new FromTerm(new InternetAddress(observedSender)));
+	        		fromTerm=new OrTerm(fromTerm, new FromStringTerm(observedSender));
 	        }	        
 	
 	        Calendar cal = Calendar.getInstance();	        
@@ -140,7 +136,7 @@ public class EmailProviderBO {
         	ex.printStackTrace();
         	return null;
         }
-    }
+	}
 
 	public void sendEmail(Email email, Properties configurationProperties) throws Exception{
 		SMTPTransport transport=null;

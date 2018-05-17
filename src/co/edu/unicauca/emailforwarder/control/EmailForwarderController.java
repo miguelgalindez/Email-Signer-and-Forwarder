@@ -1,15 +1,16 @@
-package co.edu.unicauca.emailForwarder.control;
+package co.edu.unicauca.emailforwarder.control;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Properties;
 import org.apache.commons.io.IOUtils;
-import co.edu.unicauca.emailForwarder.logic.ForwardBO;
 
-public class ForwardController {
+import co.edu.unicauca.emailforwarder.logic.ForwardBO;
+
+public class EmailForwarderController {
 	Properties configurationProperties;
 	ArrayList<String> missingProperties;
 	
-	public ForwardController(String propertiesFilePath, boolean toForwarding, boolean toVerifySignature) {		
+	public EmailForwarderController(String propertiesFilePath, boolean toForwarding, boolean toVerifySignature) {		
 		this.configurationProperties=ForwardBO.getInstance().loadProperties(propertiesFilePath, toForwarding, toVerifySignature);		
 	}		
 
@@ -25,8 +26,8 @@ public class ForwardController {
 	
 	public boolean verifySign(byte[] file, byte[] signature) throws Exception{
 		if(this.configurationProperties!=null) {
-			SignatureController signatureController = new SignatureController(configurationProperties);								
-			return ForwardBO.getInstance().verifySign(file, signature, signatureController);
+			SignatureController signatureController = new SignatureController(configurationProperties);
+			return signatureController.verifySignature(file, signature);			
 		}
 		else
 			throw new Exception("[Email-Forwarder] The signature couldn't be verified because the properties file couldn't be loaded. Check the log...");

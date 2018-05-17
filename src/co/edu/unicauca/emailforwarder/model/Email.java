@@ -1,4 +1,4 @@
-package co.edu.unicauca.emailForwarder.model;
+package co.edu.unicauca.emailforwarder.model;
 
 import java.util.ArrayList;
 import java.util.Date;

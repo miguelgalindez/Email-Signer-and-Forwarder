@@ -1,14 +1,14 @@
-package co.edu.unicauca.emailForwarder.logic;
+package co.edu.unicauca.emailforwarder.logic;
 
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Properties;
 import java.util.Set;
-import co.edu.unicauca.emailForwarder.control.EmailProviderController;
-import co.edu.unicauca.emailForwarder.control.SignatureController;
-import co.edu.unicauca.emailForwarder.model.Attachment;
-import co.edu.unicauca.emailForwarder.model.Email;
+
+import co.edu.unicauca.emailforwarder.control.EmailProviderController;
+import co.edu.unicauca.emailforwarder.control.SignatureController;
+import co.edu.unicauca.emailforwarder.model.Email;
 
 public class ForwardBO {
 	private static ForwardBO instance = null;
@@ -22,12 +22,12 @@ public class ForwardBO {
 	}
 	
 	public Properties loadProperties(String propertiesFilePath, boolean toForwarding, boolean toVerifySignature) {
-		Properties configurationProperties=this.loadPropertiesFile(propertiesFilePath, "co/edu/unicauca/emailForwarder/util/configuration-example.properties", toForwarding, toVerifySignature);
+		Properties configurationProperties=this.loadPropertiesFile(propertiesFilePath, "co/edu/unicauca/emailforwarder/util/configuration-example.properties", toForwarding, toVerifySignature);
 		if(configurationProperties!=null) {
 			if(toVerifySignature)
 				return configurationProperties;
 			if(toForwarding) {
-				Properties observedAccountProperties=loadPropertiesFile(configurationProperties.getProperty("forwarder.observedAccount.propertiesFile"), "co/edu/unicauca/emailForwarder/util/email-account-example.properties", toForwarding, toVerifySignature);
+				Properties observedAccountProperties=loadPropertiesFile(configurationProperties.getProperty("forwarder.observedAccount.propertiesFile"), "co/edu/unicauca/emailforwarder/util/email-account-example.properties", toForwarding, toVerifySignature);
 				if(observedAccountProperties!=null) {
 					configurationProperties.put("forwarder.observedAccount.user", observedAccountProperties.getProperty("user"));
 					configurationProperties.put("forwarder.observedAccount.password", observedAccountProperties.getProperty("password"));					
@@ -35,7 +35,7 @@ public class ForwardBO {
 				else 
 					return null; 
 				
-				Properties forwarderMailAccountProperties=loadPropertiesFile(configurationProperties.getProperty("forwarder.mailAccount.propertiesFile"), "co/edu/unicauca/emailForwarder/util/email-account-example.properties", toForwarding, toVerifySignature);
+				Properties forwarderMailAccountProperties=loadPropertiesFile(configurationProperties.getProperty("forwarder.mailAccount.propertiesFile"), "co/edu/unicauca/emailforwarder/util/email-account-example.properties", toForwarding, toVerifySignature);
 				if(forwarderMailAccountProperties!=null) {
 					configurationProperties.put("forwarder.mailAccount.user", forwarderMailAccountProperties.getProperty("user"));
 					configurationProperties.put("forwarder.mailAccount.password", forwarderMailAccountProperties.getProperty("password"));
@@ -61,13 +61,7 @@ public class ForwardBO {
 			emailProviderController.sendEmails(emails);
 			System.out.println("[Email-Forwarder] Emails were successfully sent.");							
 		}
-	}
-	
-	public boolean verifySign(byte[] file, byte[] signature, SignatureController signatureController ) throws Exception {				
-		Attachment attachment=new Attachment();			
-		attachment.setByteArray(file);						
-		return signatureController.verifySignature(attachment, signature);		
-	}
+	}	
 	
 	private ArrayList<String> validatePropertiesFile(Properties properties, Properties propertiesExample, boolean toForwarding, boolean toVerifySignature) {		
 		//this.printKeys(properties, propertiesExample);

@@ -1,4 +1,4 @@
-package co.edu.unicauca.emailForwarder.model;
+package co.edu.unicauca.emailforwarder.model;
 
 public class Attachment {
 	String name;
