@@ -1,6 +1,5 @@
 package co.edu.unicauca.emailforwarder.logic;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.Properties;
 import javax.activation.DataHandler;
@@ -17,20 +16,16 @@ import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.search.AndTerm;
-import javax.mail.search.DateTerm;
 import javax.mail.search.FlagTerm;
 import javax.mail.search.FromStringTerm;
 import javax.mail.search.OrTerm;
-import javax.mail.search.ReceivedDateTerm;
 import javax.mail.search.SearchTerm;
 import javax.mail.util.ByteArrayDataSource;
 import org.apache.commons.io.IOUtils;
 import org.apache.tika.config.TikaConfig;
 import org.apache.tika.io.TikaInputStream;
 import org.apache.tika.metadata.Metadata;
-
 import com.sun.mail.smtp.SMTPTransport;
-
 import co.edu.unicauca.emailforwarder.model.Attachment;
 import co.edu.unicauca.emailforwarder.model.Email;
 
@@ -121,23 +116,18 @@ public class EmailProviderBO {
 	        		fromTerm=new FromStringTerm(observedSender);
 	        	else
 	        		fromTerm=new OrTerm(fromTerm, new FromStringTerm(observedSender));
-	        }	        
-	
-	        Calendar cal = Calendar.getInstance();	        
-	        cal.roll(Calendar.DATE, false); // Set date to 1 day back from now
-	        ReceivedDateTerm latest = new ReceivedDateTerm(DateTerm.GT, cal.getTime());
-	        FlagTerm unread = new FlagTerm(new Flags(Flags.Flag.SEEN), false);	 
-	        SearchTerm latestUnread = new AndTerm(unread, latest);		      
+	        }	        	
+	        	        
+	        FlagTerm unread = new FlagTerm(new Flags(Flags.Flag.SEEN), false);
 	        SearchTerm subjectTerm=this.createSubjectTerm(properties.getProperty("forwarder.observedSubjects"));
-	        AndTerm criteria = new AndTerm(fromTerm, new OrTerm(latestUnread, subjectTerm));	        	        
-	        return criteria;
+	        return new AndTerm(fromTerm, new AndTerm(unread, subjectTerm));
         }catch(Exception ex) {
         	ex.printStackTrace();
         	return null;
         }
 	}
 	
-	private SearchTerm createSubjectTerm(String subjectRegexp) {
+	private SearchTerm createSubjectTerm(final String subjectRegexp) {
 		return new SearchTerm() {		    
 			private static final long serialVersionUID = 1L;
 
