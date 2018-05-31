@@ -120,7 +120,7 @@ public class EmailProviderBO {
 	        	        
 	        FlagTerm unread = new FlagTerm(new Flags(Flags.Flag.SEEN), false);
 	        SearchTerm subjectTerm=this.createSubjectTerm(properties.getProperty("forwarder.observedSubjects"));
-	        return new AndTerm(fromTerm, new AndTerm(unread, subjectTerm));
+	        return new AndTerm(fromTerm, new OrTerm(unread, subjectTerm));
         }catch(Exception ex) {
         	ex.printStackTrace();
         	return null;
