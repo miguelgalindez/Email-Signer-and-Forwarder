@@ -92,7 +92,7 @@ public class ForwardBO {
 				if(missingProperties.size()==0)
 					return properties;
 				else
-					System.err.println("[Email-Forwarder] Missing properties in "+propertiesFilePath+": "+String.join(", ", missingProperties));
+					System.err.println("[Email-Forwarder] Missing properties in "+propertiesFilePath+": "+missingProperties.toString());
 			}
 			else
 				System.err.println("[Email-Forwarder] The file "+propertiesFilePath+" couldn't be found");
