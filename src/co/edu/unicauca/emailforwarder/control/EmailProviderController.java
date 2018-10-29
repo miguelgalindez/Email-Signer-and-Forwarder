@@ -13,11 +13,11 @@ public class EmailProviderController {
 		this.configurationProperties=properties;
 	}
 	
-	public ArrayList<Email> getEmails() throws Exception{
+	public ArrayList<Email> fetchEmails() throws Exception{
 		if(configurationProperties!=null)
-			return EmailProviderBO.getInstance().getEmails(configurationProperties);
+			return EmailProviderBO.getInstance().fetchEmails(configurationProperties);
 		else
-			throw new Exception("[Email-Forwarder] Mails couldn't be gotten because the properties file couldn't be loaded. Check the log...");
+			throw new Exception("[Email-Forwarder] Mails couldn't be fetched because the properties file couldn't be loaded. Check the log...");
 	}
 
 	public void sendEmails(ArrayList<Email> emails) throws Exception {

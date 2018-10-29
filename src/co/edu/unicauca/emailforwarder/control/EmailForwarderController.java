@@ -1,6 +1,5 @@
 package co.edu.unicauca.emailforwarder.control;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.Properties;
 import org.apache.commons.io.IOUtils;
 
@@ -8,7 +7,6 @@ import co.edu.unicauca.emailforwarder.logic.ForwardBO;
 
 public class EmailForwarderController {
 	Properties configurationProperties;
-	ArrayList<String> missingProperties;
 	
 	public EmailForwarderController(String propertiesFilePath, boolean toForwarding, boolean toVerifySignature) {		
 		this.configurationProperties=ForwardBO.getInstance().loadProperties(propertiesFilePath, toForwarding, toVerifySignature);		

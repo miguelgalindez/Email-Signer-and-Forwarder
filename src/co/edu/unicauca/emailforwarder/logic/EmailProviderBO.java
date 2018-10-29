@@ -46,7 +46,7 @@ public class EmailProviderBO {
 		this.store=null;
 	}
 	
-	public ArrayList<Email> getEmails(Properties properties) throws Exception{                                                                  		 
+	public ArrayList<Email> fetchEmails(Properties properties) throws Exception{                                                                  		 
 		try {      	
             Message[] arrayMessages = this.getNewMessages(properties); 
             ArrayList<Email> emails=new ArrayList<>();
@@ -62,17 +62,19 @@ public class EmailProviderBO {
  
                 if (contentType.contains("multipart"))
                     this.processMultiPart(message, email);
-                else if (contentType.contains("text/plain") || contentType.contains("text/html")) {
+                else if (contentType.contains("text/plain") || contentType.contains("TEXT/PLAIN") || contentType.contains("text/html") || contentType.contains("TEXT/HTML")) {
                     Object content = message.getContent();                    
                     email.setMessage(content != null ? content instanceof String ? content.toString() : "" : null);
                 }                               
                 emails.add(email);                
             }
+            this.folderInbox.setFlags(arrayMessages, new Flags(Flags.Flag.SEEN), true);
             return emails;
 		} catch (Exception e) {throw e;}
 		finally {
 			if(this.folderInbox!=null) try{ this.folderInbox.close(false);}catch(Exception ex) {ex.getStackTrace();};
 			if(this.store!=null) try{ this.store.close();}catch(Exception ex) {ex.getStackTrace();};
+			
 		}        
     }	
 
@@ -143,53 +145,63 @@ public class EmailProviderBO {
 	}
 
 	public void sendEmail(Email email, Properties configurationProperties) throws Exception{
-		SMTPTransport transport=null;
-		try {
-			Session session = Session.getInstance(configurationProperties, null);
-			Message msg = new MimeMessage(session);			
-			msg.setFrom(new InternetAddress(configurationProperties.getProperty("forwarder.mailAccount.user"), configurationProperties.getProperty("forwarder.mailAccount.nameToDisplay")));
-			String[] receiversAddresses=configurationProperties.getProperty("forwarder.forwardTo").replaceAll(" ", "").split(",");
-			InternetAddress[] receivers=new InternetAddress[receiversAddresses.length];
-			for(int i=0; i<receiversAddresses.length; i++)
-				receivers[i]=new InternetAddress(receiversAddresses[i]);		       
-	        msg.setRecipients(Message.RecipientType.TO, receivers);
-	        //msg.setRecipients(Message.RecipientType.CC, InternetAddress.parse(ccEmail, false));
-	        
-	        msg.setSubject(email.getSubject());
-	        msg.setSentDate(new Date());
-	 
-	        // creates multi-part
-	        Multipart multipart = new MimeMultipart();
-	        
-	        // creates message part
-	        MimeBodyPart messageBodyPart = new MimeBodyPart();
-	        messageBodyPart.setContent(email.getMessage(), "text/html");	 	        	      
-	        multipart.addBodyPart(messageBodyPart);
-	         
-	        if (email.getAttachments() != null && email.getAttachments().size() > 0) {
-	            for (Attachment attachment : email.getAttachments()) {                                              
-	                ByteArrayDataSource bds = new ByteArrayDataSource(attachment.getByteArray(), this.detectMymeType(attachment.getName(), attachment.getByteArray()));
-	                MimeBodyPart attachmentPart = new MimeBodyPart();	                
-	                attachmentPart.setDataHandler(new DataHandler(bds)); 
-	                attachmentPart.setFileName(attachment.getName());
-	                multipart.addBodyPart(attachmentPart);
-
-	                bds = new ByteArrayDataSource(attachment.getSignature(), this.detectMymeType(null, attachment.getSignature()));
-	                MimeBodyPart signaturePart= new MimeBodyPart();
-	                signaturePart.setDataHandler(new DataHandler(bds)); 
-	                signaturePart.setFileName(attachment.getName()+".signature");
-	                multipart.addBodyPart(signaturePart);
-	            }
-	        }	 
-	        // sets the multi-part as e-mail's content
-	        msg.setContent(multipart);
-	        // sends the e-mail
-	        transport = (SMTPTransport) session.getTransport("smtps");
-	        transport.connect("smtp.gmail.com", configurationProperties.getProperty("forwarder.mailAccount.user"), configurationProperties.getProperty("forwarder.mailAccount.password"));
-	        transport.sendMessage(msg, msg.getAllRecipients());	        	        
-	        
-		}catch(Exception ex) {throw ex;}
-		 finally {if(transport!=null) try {transport.close();} catch (MessagingException e) {e.printStackTrace();}}
+		if(email.getMessage()!=null) {
+			SMTPTransport transport=null;
+			try {
+				Session session = Session.getInstance(configurationProperties, null);
+				Message msg = new MimeMessage(session);			
+				msg.setFrom(new InternetAddress(configurationProperties.getProperty("forwarder.mailAccount.user"), configurationProperties.getProperty("forwarder.mailAccount.nameToDisplay")));
+				String[] receiversAddresses=configurationProperties.getProperty("forwarder.forwardTo").replaceAll(" ", "").split(",");
+				InternetAddress[] receivers=new InternetAddress[receiversAddresses.length];
+				for(int i=0; i<receiversAddresses.length; i++)
+					receivers[i]=new InternetAddress(receiversAddresses[i]);		       
+		        msg.setRecipients(Message.RecipientType.TO, receivers);
+		        //msg.setRecipients(Message.RecipientType.CC, InternetAddress.parse(ccEmail, false));
+		        
+		        msg.setSubject(email.getSubject());
+		        msg.setSentDate(new Date());
+		 
+		        // creates multi-part
+		        Multipart multipart = new MimeMultipart();
+		        
+		        // creates message part
+		        MimeBodyPart messageBodyPart = new MimeBodyPart();
+		        messageBodyPart.setContent(email.getMessage(), "text/html");	 	        	      
+		        multipart.addBodyPart(messageBodyPart);
+		         
+		        if (email.getAttachments() != null && email.getAttachments().size() > 0) {
+		            for (Attachment attachment : email.getAttachments()) {                                              
+		                ByteArrayDataSource bds = new ByteArrayDataSource(attachment.getByteArray(), this.detectMymeType(attachment.getName(), attachment.getByteArray()));
+		                MimeBodyPart attachmentPart = new MimeBodyPart();	                
+		                attachmentPart.setDataHandler(new DataHandler(bds)); 
+		                attachmentPart.setFileName(attachment.getName());
+		                multipart.addBodyPart(attachmentPart);
+	
+		                bds = new ByteArrayDataSource(attachment.getSignature(), this.detectMymeType(null, attachment.getSignature()));
+		                MimeBodyPart signaturePart= new MimeBodyPart();
+		                signaturePart.setDataHandler(new DataHandler(bds)); 
+		                signaturePart.setFileName(attachment.getName()+".signature");
+		                multipart.addBodyPart(signaturePart);
+		            }
+		        }	 
+		        // sets the multi-part as e-mail's content
+		        msg.setContent(multipart);
+		        // sends the e-mail
+		        transport = (SMTPTransport) session.getTransport("smtps");
+		        transport.connect("smtp.gmail.com", configurationProperties.getProperty("forwarder.mailAccount.user"), configurationProperties.getProperty("forwarder.mailAccount.password"));
+		        transport.sendMessage(msg, msg.getAllRecipients());	        	        
+		        
+			}catch(Exception ex) {
+				System.err.println("[Email-Forwarder] The following email couldn't be sent:");
+				printEmailMetaData(email);
+				ex.printStackTrace();
+				throw ex;
+			}finally {if(transport!=null) try {transport.close();} catch (MessagingException e) {e.printStackTrace();}}
+		}
+		else {
+			System.out.println("[Email-Forwarder] The following email wasn't sent because its content is not supported yet:");
+			printEmailMetaData(email);
+		}
 	}
 	
 	private String detectMymeType(String fileName, byte[] byteArray) {
@@ -199,5 +211,9 @@ public class EmailProviderBO {
 			metadata.set(Metadata.RESOURCE_NAME_KEY, fileName);			
 			return tika.getDetector().detect(TikaInputStream.get(byteArray), metadata).getBaseType().toString();
 		}catch (Exception e) {e.printStackTrace(); return null;}
+	}
+	
+	private void printEmailMetaData(Email email) {
+		System.out.println("\t\t| Sender:\t"+email.getSender()+"\n\t\t| Subject:\t"+email.getSubject()+"\n\t\t| Sent Date:\t"+email.getSentDate());
 	}
 }

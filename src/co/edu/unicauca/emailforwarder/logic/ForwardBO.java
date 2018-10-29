@@ -49,7 +49,7 @@ public class ForwardBO {
 	
 	public void forwardEmails(EmailProviderController emailProviderController, SignatureController signatureController) throws Exception {
 		System.out.println("[Email-Forwarder] Getting emails...");
-		ArrayList<Email> emails = emailProviderController.getEmails();
+		ArrayList<Email> emails = emailProviderController.fetchEmails();
 		if(emails==null)
 			System.err.println("[Email-Forwarder] There was a problem getting the emails. Check properties files and try again.");
 		else if(emails.size()==0)
@@ -59,7 +59,7 @@ public class ForwardBO {
 			signatureController.signMailsAttachments(emails);	
 			System.out.println("[Email-Forwarder] Emails were successfully signed.");
 			emailProviderController.sendEmails(emails);
-			System.out.println("[Email-Forwarder] Emails were successfully sent.");							
+			System.out.println("[Email-Forwarder] Email forwarding successfully completed.");							
 		}
 	}	
 	

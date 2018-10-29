@@ -2,3 +2,4 @@
 .project
 .settings/
 bin/
+src/co/edu/unicauca/emailforwarder/test/email-forwarder-configuration.properties
