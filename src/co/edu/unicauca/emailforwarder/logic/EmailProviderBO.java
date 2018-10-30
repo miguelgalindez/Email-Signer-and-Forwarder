@@ -73,28 +73,9 @@ public class EmailProviderBO {
 		} catch (Exception e) {throw e;}
 		finally {
 			if(this.folderInbox!=null) try{ this.folderInbox.close(false);}catch(Exception ex) {ex.getStackTrace();};
-			if(this.store!=null) try{ this.store.close();}catch(Exception ex) {ex.getStackTrace();};
-			
-		}        
-    }	
-
-	private void processMultiPart(Message message, Email email) throws Exception {		
-		Multipart multiPart = (Multipart) message.getContent();
-        int numberOfParts = multiPart.getCount();
-        String messageContent = "";
-        for (int partCount = 0; partCount < numberOfParts; partCount++) {
-            MimeBodyPart part = (MimeBodyPart) multiPart.getBodyPart(partCount);
-            if (Part.ATTACHMENT.equalsIgnoreCase(part.getDisposition())) {
-                // this part is an attachment
-            	Attachment attachment = new Attachment();
-            	attachment.setName(part.getFileName());
-                attachment.setByteArray(IOUtils.toByteArray(part.getInputStream()));
-                email.addAttachment(attachment);                               
-            } else                            
-                messageContent += part.getContent() instanceof String ? part.getContent().toString() : ""; // this part may be the message content
-        }                    
-        email.setMessage(messageContent);
-	}
+			if(this.store!=null) try{ this.store.close();}catch(Exception ex) {ex.getStackTrace();};			
+		}
+    }
 	
 	private Message[] getNewMessages(Properties properties) throws Exception {			
 		Session session = Session.getInstance(properties, null);
@@ -144,6 +125,24 @@ public class EmailProviderBO {
 		};		
 	}
 
+	private void processMultiPart(Message message, Email email) throws Exception {		
+		Multipart multiPart = (Multipart) message.getContent();
+        int numberOfParts = multiPart.getCount();
+        String messageContent = "";
+        for (int partCount = 0; partCount < numberOfParts; partCount++) {
+            MimeBodyPart part = (MimeBodyPart) multiPart.getBodyPart(partCount);
+            if (Part.ATTACHMENT.equalsIgnoreCase(part.getDisposition())) {
+                // this part is an attachment
+            	Attachment attachment = new Attachment();
+            	attachment.setName(part.getFileName());
+                attachment.setByteArray(IOUtils.toByteArray(part.getInputStream()));
+                email.addAttachment(attachment);                               
+            } else                            
+                messageContent += part.getContent() instanceof String ? part.getContent().toString() : ""; // this part may be the message content
+        }                    
+        email.setMessage(messageContent);
+	}
+
 	public void sendEmail(Email email, Properties configurationProperties) throws Exception{
 		if(email.getMessage()!=null) {
 			SMTPTransport transport=null;
@@ -156,7 +155,6 @@ public class EmailProviderBO {
 				for(int i=0; i<receiversAddresses.length; i++)
 					receivers[i]=new InternetAddress(receiversAddresses[i]);		       
 		        msg.setRecipients(Message.RecipientType.TO, receivers);
-		        //msg.setRecipients(Message.RecipientType.CC, InternetAddress.parse(ccEmail, false));
 		        
 		        msg.setSubject(email.getSubject());
 		        msg.setSentDate(new Date());
@@ -202,6 +200,15 @@ public class EmailProviderBO {
 			System.out.println("[Email-Forwarder] The following email wasn't sent because its content is not supported yet:");
 			printEmailMetaData(email);
 		}
+	}
+	
+	public void sendEmails(ArrayList<Email> emails, Properties configurationProperties) throws Exception {
+		if(configurationProperties!=null) {
+			for(Email email : emails)
+				this.sendEmail(email, configurationProperties);			
+		}
+		else
+			throw new Exception("[Email-Forwarder] Mails couldn't be sent because the properties file couldn't be loaded. Check the log...");
 	}
 	
 	private String detectMymeType(String fileName, byte[] byteArray) {

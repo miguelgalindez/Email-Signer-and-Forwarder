@@ -5,18 +5,15 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Properties;
 import java.util.Set;
-
-import co.edu.unicauca.emailforwarder.control.EmailProviderController;
-import co.edu.unicauca.emailforwarder.control.SignatureController;
 import co.edu.unicauca.emailforwarder.model.Email;
 
-public class ForwardBO {
-	private static ForwardBO instance = null;
+public class EmailForwarderBO {
+	private static EmailForwarderBO instance = null;
 	
 	
-	public static ForwardBO getInstance() {
+	public static EmailForwarderBO getInstance() {
 		if(instance == null) {
-			instance = new ForwardBO();
+			instance = new EmailForwarderBO();
 		}
 		return instance;
 	}
@@ -47,24 +44,23 @@ public class ForwardBO {
 		return null;
 	}
 	
-	public void forwardEmails(EmailProviderController emailProviderController, SignatureController signatureController) throws Exception {
+	public void forwardEmails(Properties configurationProperties) throws Exception {
 		System.out.println("[Email-Forwarder] Getting emails...");
-		ArrayList<Email> emails = emailProviderController.fetchEmails();
+		ArrayList<Email> emails = EmailProviderBO.getInstance().fetchEmails(configurationProperties);
 		if(emails==null)
 			System.err.println("[Email-Forwarder] There was a problem getting the emails. Check properties files and try again.");
 		else if(emails.size()==0)
 			System.out.println("[Email-Forwarder] There are no new emails.");
 		else {
 			System.out.println("[Email-Forwarder] There are "+emails.size()+" new emails");			
-			signatureController.signMailsAttachments(emails);	
+			SignatureBO.getInstance().signMailsAttachments(emails, configurationProperties);	
 			System.out.println("[Email-Forwarder] Emails were successfully signed.");
-			emailProviderController.sendEmails(emails);
+			EmailProviderBO.getInstance().sendEmails(emails, configurationProperties);
 			System.out.println("[Email-Forwarder] Email forwarding successfully completed.");							
 		}
 	}	
 	
-	private ArrayList<String> validatePropertiesFile(Properties properties, Properties propertiesExample, boolean toForwarding, boolean toVerifySignature) {		
-		//this.printKeys(properties, propertiesExample);
+	private ArrayList<String> validatePropertiesFile(Properties properties, Properties propertiesExample, boolean toForwarding, boolean toVerifySignature) {
 		ArrayList<String> missingProperties=new ArrayList<>();
 		Set<String> keys = propertiesExample.stringPropertyNames();		
 		for(String key : keys) {
@@ -107,37 +103,12 @@ public class ForwardBO {
 	
 	private InputStream getInputStreamFromFilePath(String filePath) throws Exception{
 		// searching the file inside the project directory
-		InputStream inputStream = ForwardBO.class.getClassLoader().getResourceAsStream(filePath);
-		if(inputStream!=null) return inputStream;
-		// seaching the file outside the project directory (operative system directory)
+		InputStream inputStream = EmailForwarderBO.class.getClassLoader().getResourceAsStream(filePath);
+		if(inputStream!=null) 
+			return inputStream;
 		else {
-			//this.printFileContent(filePath);
+			// seaching the file outside the project directory (operative system directory)
 			return new FileInputStream(filePath);
 		}
-	}	
-	/*
-	private void printFileContent(String filePath) throws Exception {
-		System.out.println("[Email-Forwarder] Printing file content "+filePath);
-		FileReader fileReader = new FileReader(filePath);
-        String line = null;
-        BufferedReader bufferedReader = new BufferedReader(fileReader);
-        
-        while((line = bufferedReader.readLine()) != null) {
-            System.out.println(line);
-        }   
-        bufferedReader.close();
-        System.out.println("------------------------------------------------------------------------");
-	}
-	
-	private void printKeys(Properties prop,  Properties propExample) {
-		Set<String> keys = prop.stringPropertyNames();
-		Set<String> keysExample = propExample.stringPropertyNames();
-		System.out.println("\n[Email-Forwarder]keys for prop:");
-		for(String key : keys)
-			System.out.println("[Email-Forwarder] "+key+" "+prop.getProperty(key));
-		
-		System.out.println("\n[Email-Forwarder] Keys for propExample:");
-		for(String key : keysExample)
-			System.out.println("[Email-Forwarder] "+key+" "+propExample.getProperty(key));
-	}*/
+	}		
 }

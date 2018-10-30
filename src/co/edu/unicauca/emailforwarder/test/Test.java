@@ -10,5 +10,4 @@ public class Test {
 		emailForwarderController.forwardEmails();
 		System.out.println("Test completed");
 	}
-
 }

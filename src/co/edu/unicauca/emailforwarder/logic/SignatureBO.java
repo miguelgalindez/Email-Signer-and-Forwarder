@@ -9,9 +9,11 @@ import java.security.PublicKey;
 import java.security.Signature;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
+import java.util.ArrayList;
 import java.util.Properties;
 
 import co.edu.unicauca.emailforwarder.model.Attachment;
+import co.edu.unicauca.emailforwarder.model.Email;
 
 public class SignatureBO {
 	private static SignatureBO instance = null;	
@@ -23,20 +25,14 @@ public class SignatureBO {
 		return instance;
 	}
 	
-	
-	public byte[] sign(Attachment attachment, Properties properties) throws Exception{		
-		return this.sign(attachment.getByteArray(), properties);
-	}
-	
-	public boolean verifySignature(Attachment attachment, byte[] signature, Properties properties) throws Exception{				
-		return this.verifySignature(attachment.getByteArray(), signature, properties);		
-	}
-	
-	public boolean verifySignature(byte[] file, byte[] signature, Properties properties) throws Exception{						
-		Signature sig = Signature.getInstance("SHA256withRSA");
-		sig.initVerify(this.getPublicKey(properties.getProperty("forwarder.publicKeyFile")));
-		sig.update(file);		
-		return sig.verify(signature);
+	public void signMailsAttachments(ArrayList<Email> emails, Properties properties) throws Exception{
+		if(properties!=null) {
+			for(Email email : emails)
+				for(Attachment attachment : email.getAttachments())
+					attachment.setSignature(this.sign(attachment.getByteArray(), properties));
+		}
+		else
+			throw new Exception("[Email-Forwarder] Mails attachments couldn't be signed because the properties file couldn't be loaded. Check the log...");
 	}
 	
 	private byte[] sign(byte[] data, Properties properties) throws InvalidKeyException, Exception{
@@ -44,19 +40,18 @@ public class SignatureBO {
 		rsa.initSign(this.getPrivateKey(properties.getProperty("forwarder.privateKeyFile")));
 		rsa.update(data);
 		return rsa.sign();
-	}
-	/*
-	public PrivateKey getPrivateKey(String filename) throws Exception {					
-		byte[] keyBytes = Files.readAllBytes(new File(filename).toPath());  		
-		PBEKeySpec pbeSpec = new PBEKeySpec("unicauca".toCharArray());
-	    EncryptedPrivateKeyInfo pkinfo = new EncryptedPrivateKeyInfo(keyBytes);
-	    SecretKeyFactory skf = SecretKeyFactory.getInstance(pkinfo.getAlgName());
-	    Key secret = skf.generateSecret(pbeSpec);
-	    PKCS8EncodedKeySpec keySpec = pkinfo.getKeySpec(secret);
-	    KeyFactory kf = KeyFactory.getInstance("RSA");
-	    return kf.generatePrivate(keySpec);
-	}
-	*/
+	}	
+	
+	public boolean verifySignature(byte[] file, byte[] signature, Properties properties) throws Exception{
+		if(properties!=null) {
+			Signature sig = Signature.getInstance("SHA256withRSA");
+			sig.initVerify(this.getPublicKey(properties.getProperty("forwarder.publicKeyFile")));
+			sig.update(file);		
+			return sig.verify(signature);
+		}
+		else
+			throw new Exception("[Email-Forwarder] The signature couldn't be verified because the properties file couldn't be loaded. Check the log...");			
+	}	
 	
 	public PrivateKey getPrivateKey(String filename) throws Exception {
 		byte[] keyBytes = Files.readAllBytes(new File(filename).toPath());
