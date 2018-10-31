@@ -101,28 +101,12 @@ public class EmailProviderBO {
 	        		fromTerm=new OrTerm(fromTerm, new FromStringTerm(observedSender));
 	        }	        	
 	        	        
-	        FlagTerm unread = new FlagTerm(new Flags(Flags.Flag.SEEN), false);
-	        SearchTerm subjectTerm=this.createSubjectTerm(properties.getProperty("forwarder.observedSubjects"));
-	        return new AndTerm(fromTerm, new OrTerm(unread, subjectTerm));
+	        FlagTerm unread = new FlagTerm(new Flags(Flags.Flag.SEEN), false);	        
+	        return new AndTerm(fromTerm, unread);
         }catch(Exception ex) {
         	ex.printStackTrace();
         	return null;
         }
-	}
-	
-	private SearchTerm createSubjectTerm(final String subjectRegexp) {
-		return new SearchTerm() {		    
-			private static final long serialVersionUID = 1L;
-
-			public boolean match(Message message) {
-		        try {
-		        	return message.getSubject().matches(subjectRegexp);
-		        } catch (MessagingException ex) {
-		            ex.printStackTrace();
-		            return false;
-		        }		        
-		    }
-		};		
 	}
 
 	private void processMultiPart(Message message, Email email) throws Exception {		
@@ -148,9 +132,22 @@ public class EmailProviderBO {
 			SMTPTransport transport=null;
 			try {
 				Session session = Session.getInstance(configurationProperties, null);
-				Message msg = new MimeMessage(session);			
+				Message msg = new MimeMessage(session);
 				msg.setFrom(new InternetAddress(configurationProperties.getProperty("forwarder.mailAccount.user"), configurationProperties.getProperty("forwarder.mailAccount.nameToDisplay")));
-				String[] receiversAddresses=configurationProperties.getProperty("forwarder.forwardTo").replaceAll(" ", "").split(",");
+				/**
+				 * Next, this method figures out the recipients of the email. If the email subject
+				 * matches the regular expression, then the email is forwarded to the accounts
+				 * specified by the property: 'forwarder.forwardTo'. All the emails that doesn't
+				 * match the regular expression are forwarded to the accounts specified by the
+				 * property: 'forwarder.forwardOtherEmailsTo'.
+				 */
+				String emailSubjectRegExp=configurationProperties.getProperty("forwarder.subjectRegExp");
+				String[] receiversAddresses=null;
+				if(emailSubjectRegExp!=null && email.getSubject().matches(emailSubjectRegExp))
+					receiversAddresses=configurationProperties.getProperty("forwarder.forwardTo").replaceAll(" ", "").split(",");
+				else
+					receiversAddresses=configurationProperties.getProperty("forwarder.forwardOtherEmailsTo").replaceAll(" ", "").split(",");
+				
 				InternetAddress[] receivers=new InternetAddress[receiversAddresses.length];
 				for(int i=0; i<receiversAddresses.length; i++)
 					receivers[i]=new InternetAddress(receiversAddresses[i]);		       
