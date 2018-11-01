@@ -57,7 +57,7 @@ public class EmailProviderBO {
 				email.setSender(message.getFrom()[0].toString());				
                 email.setSubject(message.getSubject());
                 email.setSentDate(message.getSentDate());                
- 
+                
                 String contentType = message.getContentType();                
  
                 if (contentType.contains("multipart"))
@@ -143,7 +143,7 @@ public class EmailProviderBO {
 				 */
 				String emailSubjectRegExp=configurationProperties.getProperty("forwarder.subjectRegExp");
 				String[] receiversAddresses=null;
-				if(emailSubjectRegExp!=null && email.getSubject().matches(emailSubjectRegExp))
+				if(email.getSubject()!=null && emailSubjectRegExp!=null && email.getSubject().matches(emailSubjectRegExp))
 					receiversAddresses=configurationProperties.getProperty("forwarder.forwardTo").replaceAll(" ", "").split(",");
 				else
 					receiversAddresses=configurationProperties.getProperty("forwarder.forwardOtherEmailsTo").replaceAll(" ", "").split(",");
@@ -189,8 +189,7 @@ public class EmailProviderBO {
 			}catch(Exception ex) {
 				System.err.println("[Email-Forwarder] The following email couldn't be sent:");
 				printEmailMetaData(email);
-				ex.printStackTrace();
-				throw ex;
+				ex.printStackTrace();				
 			}finally {if(transport!=null) try {transport.close();} catch (MessagingException e) {e.printStackTrace();}}
 		}
 		else {

@@ -45,13 +45,10 @@ public class EmailForwarderBO {
 	}
 	
 	public void forwardEmails(Properties configurationProperties) throws Exception {
-		System.out.println("[Email-Forwarder] Getting emails...");
 		ArrayList<Email> emails = EmailProviderBO.getInstance().fetchEmails(configurationProperties);
 		if(emails==null)
 			System.err.println("[Email-Forwarder] There was a problem getting the emails. Check properties files and try again.");
-		else if(emails.size()==0)
-			System.out.println("[Email-Forwarder] There are no new emails.");
-		else {
+		else if(emails.size()>0){
 			System.out.println("[Email-Forwarder] There are "+emails.size()+" new emails");			
 			SignatureBO.getInstance().signMailsAttachments(emails, configurationProperties);	
 			System.out.println("[Email-Forwarder] Emails were successfully signed.");
